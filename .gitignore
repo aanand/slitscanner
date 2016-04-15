@@ -1,0 +1,5 @@
+*.env
+*.pkl
+*.log
+/tmp
+/samples
