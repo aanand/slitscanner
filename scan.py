@@ -1,15 +1,12 @@
+from bot import start_logging
 from extensions.processor import Processor
 import sys
-import logging
 
-stderr = logging.StreamHandler()
-stderr.setLevel(logging.DEBUG)
-stderr.setFormatter(logging.Formatter(fmt='%(levelname)8s: %(message)s'))
+start_logging()
 
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-root_logger.addHandler(stderr)
+target = sys.argv[1]
 
-url = sys.argv[1]
-
-print Processor().scan_url(url)
+if target.startswith(('http://', 'https://')):
+    print Processor().scan_url(target)
+else:
+    print Processor().scan_file(target)
