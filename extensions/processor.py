@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import urllib
+import json
 
 from . import slitscan
 
@@ -80,6 +81,32 @@ class Processor:
         return gif_filename
 
     def extract_frames(self, filename, frame_rate):
+        if self.is_gif(filename):
+            return self.extract_gif_frames(filename)
+        else:
+            return self.extract_movie_frames(filename, frame_rate)
+
+    def is_gif(self, filename):
+        out = check_call([
+            self.ffprobe_binary,
+            "-show_format",
+            "-print_format", "json",
+            filename,
+        ])
+        format_name = json.loads(out)['format']['format_name']
+        return format_name == "gif"
+
+    def extract_gif_frames(self, filename):
+        frames_dir = tempfile.mkdtemp(dir=self.tmp_dir)
+        check_call([
+            'convert',
+            '-coalesce',
+            filename,
+            os.path.join(frames_dir, '%04d.png')
+        ])
+        return sorted([os.path.join(frames_dir, f) for f in os.listdir(frames_dir)])
+
+    def extract_movie_frames(self, filename, frame_rate):
         frames_dir = tempfile.mkdtemp(dir=self.tmp_dir)
         check_call([
             self.ffmpeg_binary,
