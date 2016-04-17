@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from twitterbot import TwitterBot
 
+from extensions.giftweet import get_gif_video_url
 from extensions.http import to_filename
 from extensions.slitscan import scan_frames
 from extensions.sql_storage import SQLStorage
@@ -13,19 +14,13 @@ from extensions.video import get_frame_rate
 from extensions.video import make_gif
 
 import arrow
-from bs4 import BeautifulSoup
 
 import random
 import os
 import logging
-import urllib
-import re
-from io import BytesIO
 
 
 log = logging.getLogger(__name__)
-
-URL_PATTERN = re.compile(r'^https?://twitter\.com/(\w+)/status/(\d+)/photo/1$')
 
 
 def scan(url_or_filename):
@@ -114,7 +109,7 @@ class SlitScanner(TwitterBot):
             return
 
     def reply_to_tweet(self, tweet, prefix):
-        video_url = self.get_gif_video_url(tweet)
+        video_url = get_gif_video_url(self.api, tweet)
         if video_url is None:
             self.log("Couldn't find a gif video URL for {}".format(self._tweet_url(tweet)))
             return
@@ -178,60 +173,6 @@ class SlitScanner(TwitterBot):
         if 'recent_replies' not in self.state:
             self.state['recent_replies'] = []
         return self.state['recent_replies']
-
-    def get_gif_video_url(self, tweet):
-        url = self.get_gif_page_urls_climbing(tweet)
-        if url is None:
-            return None
-
-        tweet_id = URL_PATTERN.match(url).group(2)
-
-        self.log("Opening {}".format(url))
-        html = urllib.urlopen(url).read()
-        soup = BeautifulSoup(html)
-
-        tag = soup.find('div', attrs={"data-tweet-id": tweet_id})
-        if not tag:
-            self.log("Couldn't find a div with data-tweet-id={} - giving up".format(repr(tweet_id)))
-            return None
-
-        match = re.search(r'https?://pbs\.twimg\.com/tweet_video_thumb/(.+)\.\w+', unicode(tag))
-        if not match:
-            self.log("Couldn't find a thumbnail URL - giving up")
-            return None
-
-        return "https://pbs.twimg.com/tweet_video/{}.mp4".format(match.group(1))
-
-    def get_gif_page_urls_climbing(self, tweet):
-        while True:
-            url = self.get_gif_page_url(tweet)
-
-            if url:
-                return url
-
-            if tweet.in_reply_to_status_id is None:
-                break
-
-            tweet = self.api.get_status(tweet.in_reply_to_status_id)
-
-            # don't glitch yourself mate
-            if tweet.author.id == self.id:
-                self.log("Found my own tweet ({}) - stopping".format(self._tweet_url(tweet)))
-                break
-
-            self.log("Climbing up to status {}".format(self._tweet_url(tweet)))
-
-    # We're looking for a media entity with a "http://twitter.com/.../photo/1" URL
-    def get_gif_page_url(self, tweet):
-        self.log("Getting GIF page URL for {}".format(self._tweet_url(tweet)))
-
-        for media in tweet.entities.get('media', []):
-            if URL_PATTERN.match(media['expanded_url']):
-                self.log("Found link: {}".format(media['expanded_url']))
-                return media['expanded_url']
-
-        self.log("Tweet has no media entity with a matching URL - giving up")
-        return None
 
 
 def start_logging():
