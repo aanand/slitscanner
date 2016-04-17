@@ -5,8 +5,12 @@ from __future__ import unicode_literals
 
 from twitterbot import TwitterBot
 
-from extensions.processor import Processor
+from extensions.http import to_filename
+from extensions.slitscan import scan_frames
 from extensions.sql_storage import SQLStorage
+from extensions.video import extract_frames
+from extensions.video import get_frame_rate
+from extensions.video import make_gif
 
 import arrow
 from bs4 import BeautifulSoup
@@ -19,7 +23,22 @@ import re
 from io import BytesIO
 
 
+log = logging.getLogger(__name__)
+
 URL_PATTERN = re.compile(r'^https?://twitter\.com/(\w+)/status/(\d+)/photo/1$')
+
+
+def scan(url_or_filename):
+    """
+    Takes a URL or filename and returns a path to a .gif file
+    containing a slit-scanned version of the video.
+    """
+    filename = to_filename(url_or_filename)
+    frame_rate = get_frame_rate(filename, 24.0)
+    log.info("Frame rate: {}fps".format(frame_rate))
+    frames = extract_frames(filename, frame_rate)
+    frames = list(scan_frames(frames))
+    return make_gif(frames, frame_rate)
 
 
 class SlitScanner(TwitterBot):
@@ -101,7 +120,7 @@ class SlitScanner(TwitterBot):
             return
 
         text = prefix
-        filename = self.generate_gif(video_url)
+        filename = scan(video_url)
 
         if self._is_silent():
             self.log("Silent mode is on. Would've responded to {} with '{} {}'".format(
@@ -159,9 +178,6 @@ class SlitScanner(TwitterBot):
         if 'recent_replies' not in self.state:
             self.state['recent_replies'] = []
         return self.state['recent_replies']
-
-    def generate_gif(self, video_url):
-        return Processor().scan_url(video_url)
 
     def get_gif_video_url(self, tweet):
         url = self.get_gif_page_urls_climbing(tweet)

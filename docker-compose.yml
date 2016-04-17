@@ -8,6 +8,7 @@ bot:
   volumes:
     - .:/code
   environment:
+    TMPDIR: /code/tmp
     DATABASE_URL: "postgres://postgres@db:5432/postgres"
     TWITTER_CONSUMER_KEY:
     TWITTER_CONSUMER_SECRET:
