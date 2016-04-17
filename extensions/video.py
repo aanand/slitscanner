@@ -51,14 +51,8 @@ def extract_frames(filename, frame_rate):
 
 
 def is_gif(filename):
-    out = check_call([
-        'ffprobe',
-        "-show_format",
-        "-print_format", "json",
-        filename,
-    ])
-    format_name = json.loads(out)['format']['format_name']
-    return format_name == "gif"
+    data = ffprobe(filename, 'format=format_name')
+    return data['format']['format_name'] == "gif"
 
 
 def extract_gif_frames(filename):
@@ -86,14 +80,8 @@ def extract_movie_frames(filename, frame_rate):
 
 # Adapted from http://askubuntu.com/a/723362
 def get_frame_rate(filename, default):
-    out = check_call([
-        'ffprobe', filename,
-        "-v", "0",
-        "-select_streams", "v",
-        "-print_format", "flat",
-        "-show_entries", "stream=r_frame_rate",
-    ])
-    rate = out.split('=')[1].strip()[1:-1].split('/')
+    rate = ffprobe_stream(filename, 'r_frame_rate').split('/')
+
     if len(rate)==1:
         return float(rate[0])
     if len(rate)==2:
@@ -101,6 +89,23 @@ def get_frame_rate(filename, default):
 
     log.error("Unparseable output: {}".format(out))
     return default
+
+
+def ffprobe_stream(filename, variable):
+    data = ffprobe(filename, "stream={}".format(variable))
+    return data['streams'][0][variable]
+
+
+def ffprobe(filename, variables):
+    output = check_call([
+        'ffprobe',
+        "-v", "0",
+        "-select_streams", "v",
+        "-print_format", "json",
+        "-show_entries", variables,
+        filename,
+    ])
+    return json.loads(output)
 
 
 def check_call(cmd, *args, **kwargs):
