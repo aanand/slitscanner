@@ -28,8 +28,12 @@ def scan_frames(filenames, tmp_dir=None):
     else:
         num_bands = len(frames)
 
+    band_height = float(frame_size[1]) / num_bands
+
     log.info("Num frames: {}".format(len(frames)))
     log.info("Num bands: {}".format(num_bands))
+    log.info("Frame size: {}".format(frame_size))
+    log.info("Band height: {}".format(band_height))
     log.info("Saving frames to {}".format(frame_dir))
 
     for index, file in enumerate(filenames):
@@ -38,6 +42,7 @@ def scan_frames(filenames, tmp_dir=None):
             frames=frames,
             index=index,
             num_bands=num_bands,
+            band_height=band_height,
         )
         new_frame.save(new_path)
         yield new_path
@@ -45,10 +50,10 @@ def scan_frames(filenames, tmp_dir=None):
 
 def make_frame(frames,
                index,
-               num_bands):
+               num_bands,
+               band_height):
 
     frame = Image.new("RGB", frames[0].size)
-    band_height = float(frame.size[1]) / num_bands
 
     for band_index in range(num_bands):
         overlay_index = (index + band_index) % len(frames)
