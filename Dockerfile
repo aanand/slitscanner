@@ -1,6 +1,24 @@
-FROM python:2.7
+FROM ubuntu:15.04
 
-RUN apt-get update -qq && apt-get install -y git python-psycopg2
+RUN set -ex; \
+    apt-get update -qq; \
+    apt-get -y install \
+      ffmpeg \
+      git \
+      imagemagick \
+      libopencv-dev \
+      libpq-dev \
+      ocl-icd-opencl-dev \
+      python-dev \
+      python-opencv \
+      python-pip \
+      python-psycopg2 \
+      virtualenv \
+    ; \
+    rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/dthpham/butterflow.git /butterflow
+RUN pip install /butterflow
 
 RUN mkdir /code
 WORKDIR /code

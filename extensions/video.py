@@ -92,6 +92,17 @@ def get_frame_rate(filename, default):
     return default
 
 
+def get_num_frames(filename):
+    return int(ffprobe_stream(filename, 'nb_frames'))
+
+
+def get_dimensions(filename):
+    data = ffprobe(filename, 'stream=width,height')
+    width = int(data['streams'][0]['width'])
+    height = int(data['streams'][0]['height'])
+    return (width, height)
+
+
 def ffprobe_stream(filename, variable):
     data = ffprobe(filename, "stream={}".format(variable))
     return data['streams'][0][variable]

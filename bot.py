@@ -8,9 +8,12 @@ from twitterbot import TwitterBot
 from extensions.giftweet import get_gif_video_url
 from extensions.http import to_filename
 from extensions.slitscan import scan_frames
+from extensions.smooth import smooth_video
 from extensions.sql_storage import SQLStorage
 from extensions.video import extract_frames
+from extensions.video import get_dimensions
 from extensions.video import get_frame_rate
+from extensions.video import get_num_frames
 from extensions.video import make_gif
 
 import arrow
@@ -23,16 +26,45 @@ import logging
 log = logging.getLogger(__name__)
 
 
+# The minimum number of bands to split the image into.
+# If the number of frames is less than this, we first
+# increase the framerate with smoothing.
+MIN_BANDS = 100
+
+
 def scan(url_or_filename):
     """
     Takes a URL or filename and returns a path to a .gif file
     containing a slit-scanned version of the video.
     """
     filename = to_filename(url_or_filename)
+
+    num_frames = get_num_frames(filename)
+    log.info("Num frames: {}".format(num_frames))
+
+    if num_frames < MIN_BANDS:
+        filename = smooth_video(filename, '2x')
+        num_frames = get_num_frames(filename)
+        log.info("Num frames after smoothing: {}".format(num_frames))
+
+    (frame_width, frame_height) = get_dimensions(filename)
+    log.info("Dimensions: {}x{}".format(frame_width, frame_height))
+
+    num_bands = max(MIN_BANDS, min(frame_height, num_frames))
+    log.info("Num bands: {}".format(num_bands))
+
+    band_height = float(frame_height) / num_bands
+    log.info("Band height: {}".format(band_height))
+
     frame_rate = get_frame_rate(filename, 24.0)
     log.info("Frame rate: {}fps".format(frame_rate))
+
     frames = extract_frames(filename, frame_rate)
-    frames = list(scan_frames(frames))
+    frames = list(scan_frames(
+        frames,
+        num_bands=num_bands,
+        band_height=band_height,
+    ))
     return make_gif(frames, frame_rate)
 
 

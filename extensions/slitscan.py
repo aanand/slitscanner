@@ -10,31 +10,14 @@ from PIL import ImageDraw
 log = logging.getLogger(__name__)
 
 
-BAND_PLATEAU = 64
-MAX_WRAPAROUNDS = 2
+def scan_frames(filenames,
+                num_bands,
+                band_height):
 
-
-def scan_frames(filenames, tmp_dir=None):
-    frame_dir = tempfile.mkdtemp(dir=tmp_dir)
+    frame_dir = tempfile.mkdtemp()
+    log.info("Saving frames to {}".format(frame_dir))
 
     frames = [Image.open(f).convert("RGB") for f in filenames]
-    frame_size = frames[0].size
-    frame_width, frame_height = frame_size
-
-    if len(frames) < BAND_PLATEAU/MAX_WRAPAROUNDS:
-        num_bands = len(frames)*MAX_WRAPAROUNDS
-    elif len(frames) < BAND_PLATEAU:
-        num_bands = BAND_PLATEAU
-    else:
-        num_bands = len(frames)
-
-    band_height = float(frame_size[1]) / num_bands
-
-    log.info("Num frames: {}".format(len(frames)))
-    log.info("Num bands: {}".format(num_bands))
-    log.info("Frame size: {}".format(frame_size))
-    log.info("Band height: {}".format(band_height))
-    log.info("Saving frames to {}".format(frame_dir))
 
     for index, file in enumerate(filenames):
         new_path = os.path.join(frame_dir, os.path.basename(file))
