@@ -1,10 +1,11 @@
 import logging
 import os
-import subprocess
 import sys
 import tempfile
 import urllib
 import json
+
+from .command import check_call
 
 
 log = logging.getLogger(__name__)
@@ -106,15 +107,3 @@ def ffprobe(filename, variables):
         filename,
     ])
     return json.loads(output)
-
-
-def check_call(cmd, *args, **kwargs):
-    log.info("$ %s" % " ".join(cmd))
-    output = ""
-
-    try:
-        output = subprocess.check_output(cmd, *args, **kwargs)
-        return output
-    except subprocess.CalledProcessError:
-        log.error(output)
-        raise
