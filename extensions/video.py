@@ -11,12 +11,10 @@ from .command import check_call
 log = logging.getLogger(__name__)
 
 
-def make_gif(all_frames, frame_rate):
+def make_gif(all_frames, frame_rate, max_size=None):
     _, gif_filename = tempfile.mkstemp('.gif')
 
     step = 1
-
-    max_size = 5 * 1024 * 1024
 
     while True:
         frames = all_frames[::step]
@@ -36,12 +34,11 @@ def make_gif(all_frames, frame_rate):
         cmd.append(gif_filename)
         check_call(cmd)
 
-        if os.stat(gif_filename).st_size < max_size:
-            break
+        if max_size and os.stat(gif_filename).st_size > max_size:
+            step += 1
+            continue
 
-        step += 1
-
-    return gif_filename
+        return gif_filename
 
 
 def to_video(filename):

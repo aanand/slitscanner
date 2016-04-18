@@ -67,7 +67,11 @@ def scan(url_or_filename):
         num_bands=num_bands,
         band_height=band_height,
     ))
-    return make_gif(frames, frame_rate)
+    return make_gif(
+        frames,
+        frame_rate=frame_rate,
+        max_size=5*1024*1024,
+    )
 
 
 class SlitScanner(TwitterBot):
