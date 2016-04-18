@@ -70,7 +70,7 @@ def scan(url_or_filename):
     return make_gif(
         frames,
         frame_rate=frame_rate,
-        max_size=5*1024*1024,
+        max_size=3*1024*1024,
     )
 
 
