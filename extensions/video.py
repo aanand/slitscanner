@@ -44,11 +44,28 @@ def make_gif(all_frames, frame_rate):
     return gif_filename
 
 
-def extract_frames(filename, frame_rate):
+def to_video(filename):
     if is_gif(filename):
-        return extract_gif_frames(filename)
-    else:
-        return extract_movie_frames(filename, frame_rate)
+        # Round width and height down to nearest even number
+        (width, height) = get_dimensions(filename)
+        width = width & ~1
+        height = height & ~1
+
+        _, out_filename = tempfile.mkstemp('.mp4')
+
+        check_call([
+            'ffmpeg',
+            '-y',
+            '-i', filename,
+            '-c:v', 'libx264',
+            '-pix_fmt', 'yuv420p',
+            '-s', '{}x{}'.format(width, height),
+            out_filename,
+        ])
+
+        return out_filename
+
+    return filename
 
 
 def is_gif(filename):
@@ -56,18 +73,7 @@ def is_gif(filename):
     return data['format']['format_name'] == "gif"
 
 
-def extract_gif_frames(filename):
-    frames_dir = tempfile.mkdtemp()
-    check_call([
-        'convert',
-        '-coalesce',
-        filename,
-        os.path.join(frames_dir, '%04d.png')
-    ])
-    return sorted([os.path.join(frames_dir, f) for f in os.listdir(frames_dir)])
-
-
-def extract_movie_frames(filename, frame_rate):
+def extract_frames(filename, frame_rate):
     frames_dir = tempfile.mkdtemp()
     check_call([
         'ffmpeg',

@@ -15,6 +15,7 @@ from extensions.video import get_dimensions
 from extensions.video import get_frame_rate
 from extensions.video import get_num_frames
 from extensions.video import make_gif
+from extensions.video import to_video
 
 import arrow
 
@@ -38,6 +39,7 @@ def scan(url_or_filename):
     containing a slit-scanned version of the video.
     """
     filename = to_filename(url_or_filename)
+    filename = to_video(filename)
 
     num_frames = get_num_frames(filename)
     log.info("Num frames: {}".format(num_frames))
