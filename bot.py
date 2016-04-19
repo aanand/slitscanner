@@ -39,10 +39,6 @@ MIN_BANDS = 100
 
 
 def scan(url_or_filename, base_dir, destination):
-    """
-    Takes a URL or filename and returns a path to a .gif file
-    containing a slit-scanned version of the video.
-    """
     filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
     filename = to_video(filename, os.path.join(base_dir, 'source.mp4'))
 
