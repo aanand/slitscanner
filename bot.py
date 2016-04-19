@@ -23,6 +23,7 @@ import arrow
 import random
 import os
 import logging
+import traceback
 
 
 log = logging.getLogger(__name__)
@@ -153,8 +154,8 @@ class SlitScanner(TwitterBot):
 
         try:
             self.reply_to_tweet(tweet, prefix)
-        except Exception as e:
-            self.log(str(e))
+        except Exception:
+            traceback.print_exc()
             return
 
     def on_timeline(self, tweet, prefix):
@@ -169,8 +170,8 @@ class SlitScanner(TwitterBot):
 
         try:
             self.reply_to_tweet(tweet, prefix)
-        except Exception as e:
-            self.log(str(e))
+        except Exception:
+            traceback.print_exc()
             return
 
     def reply_to_tweet(self, tweet, prefix):
