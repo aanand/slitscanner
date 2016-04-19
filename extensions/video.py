@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import tempfile
 import urllib
 import json
 
@@ -11,9 +10,7 @@ from .command import check_call
 log = logging.getLogger(__name__)
 
 
-def make_gif(all_frames, frame_rate, max_size=None):
-    _, gif_filename = tempfile.mkstemp('.gif')
-
+def make_gif(all_frames, destination, frame_rate, max_size=None):
     step = 1
 
     while True:
@@ -31,24 +28,22 @@ def make_gif(all_frames, frame_rate, max_size=None):
             '-layers', 'Optimize',
         ]
         cmd += frames
-        cmd.append(gif_filename)
+        cmd.append(destination)
         check_call(cmd)
 
-        if max_size and os.stat(gif_filename).st_size > max_size:
+        if max_size and os.stat(destination).st_size > max_size:
             step += 1
             continue
 
-        return gif_filename
+        return
 
 
-def to_video(filename):
+def to_video(filename, destination):
     if is_gif(filename):
         # Round width and height down to nearest even number
         (width, height) = get_dimensions(filename)
         width = width & ~1
         height = height & ~1
-
-        _, out_filename = tempfile.mkstemp('.mp4')
 
         check_call([
             'ffmpeg',
@@ -57,10 +52,10 @@ def to_video(filename):
             '-c:v', 'libx264',
             '-pix_fmt', 'yuv420p',
             '-s', '{}x{}'.format(width, height),
-            out_filename,
+            destination,
         ])
 
-        return out_filename
+        return destination
 
     return filename
 
@@ -70,16 +65,22 @@ def is_gif(filename):
     return data['format']['format_name'] == "gif"
 
 
-def extract_frames(filename, frame_rate):
-    frames_dir = tempfile.mkdtemp()
+def extract_frames(filename, destination, frame_rate):
+    if not os.path.exists(destination):
+        os.makedirs(destination)
+
     check_call([
         'ffmpeg',
         '-y',
         '-i', filename,
         '-r', str(frame_rate),
-        os.path.join(frames_dir, '%04d.png'),
+        os.path.join(destination, '%04d.png'),
     ])
-    return sorted([os.path.join(frames_dir, f) for f in os.listdir(frames_dir)])
+
+    return sorted([
+        os.path.join(destination, f)
+        for f in os.listdir(destination)
+    ])
 
 
 # Adapted from http://askubuntu.com/a/723362

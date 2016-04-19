@@ -8,6 +8,7 @@ services:
       - data:/data
     environment:
       TMPDIR: /code/tmp
+      DEBUG: '1'
       TWITTER_CONSUMER_KEY:
       TWITTER_CONSUMER_SECRET:
       TWITTER_ACCESS_TOKEN:

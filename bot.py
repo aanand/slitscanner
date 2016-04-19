@@ -10,6 +10,7 @@ from extensions.giftweet import get_gif_video_url
 from extensions.http import to_filename
 from extensions.slitscan import scan_frames
 from extensions.smooth import smooth_video
+from extensions.tmpdir import tmpdir
 from extensions.video import extract_frames
 from extensions.video import get_dimensions
 from extensions.video import get_frame_rate
@@ -27,27 +28,24 @@ import logging
 log = logging.getLogger(__name__)
 
 
+DEBUG = int(os.environ.get('DEBUG') or '0') != 0
+
+
 # The minimum number of bands to split the image into.
 # If the number of frames is less than this, we first
 # increase the framerate with smoothing.
 MIN_BANDS = 100
 
 
-def scan(url_or_filename):
+def scan(url_or_filename, base_dir, destination):
     """
     Takes a URL or filename and returns a path to a .gif file
     containing a slit-scanned version of the video.
     """
-    filename = to_filename(url_or_filename)
-    filename = to_video(filename)
+    filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
+    filename = to_video(filename, os.path.join(base_dir, 'source.mp4'))
 
-    num_frames = get_num_frames(filename)
-    log.info("Num frames: {}".format(num_frames))
-
-    if num_frames < MIN_BANDS:
-        filename = smooth_video(filename, '2x')
-        num_frames = get_num_frames(filename)
-        log.info("Num frames after smoothing: {}".format(num_frames))
+    filename, num_frames = smooth(filename, base_dir)
 
     (frame_width, frame_height) = get_dimensions(filename)
     log.info("Dimensions: {}x{}".format(frame_width, frame_height))
@@ -61,17 +59,41 @@ def scan(url_or_filename):
     frame_rate = get_frame_rate(filename, 24.0)
     log.info("Frame rate: {}fps".format(frame_rate))
 
-    frames = extract_frames(filename, frame_rate)
+    frames = extract_frames(
+        filename,
+        os.path.join(base_dir, 'frames'),
+        frame_rate,
+    )
+
     frames = list(scan_frames(
         frames,
+        os.path.join(base_dir, 'scanned'),
         num_bands=num_bands,
         band_height=band_height,
     ))
-    return make_gif(
+
+    make_gif(
         frames,
+        destination,
         frame_rate=frame_rate,
         max_size=3*1024*1024,
     )
+
+
+def smooth(filename, base_dir):
+    num_frames = get_num_frames(filename)
+    log.info("Num frames: {}".format(num_frames))
+
+    if num_frames >= MIN_BANDS:
+        return filename, num_frames
+
+    smoothed_filename = os.path.join(base_dir, 'source-2x.mp4')
+    smooth_video(filename, smoothed_filename, '2x')
+
+    num_frames = get_num_frames(filename)
+    log.info("Num frames after smoothing: {}".format(num_frames))
+
+    return smoothed_filename, num_frames
 
 
 class SlitScanner(TwitterBot):
@@ -153,18 +175,23 @@ class SlitScanner(TwitterBot):
             return
 
         text = prefix
-        filename = scan(video_url)
 
-        if self._is_silent():
-            self.log("Silent mode is on. Would've responded to {} with '{} {}'".format(
-                self._tweet_url(tweet), text, filename))
-            return
+        with tmpdir(delete=not DEBUG) as base_dir:
+            filename = os.path.join(base_dir, 'scanned.gif')
 
-        self.post_tweet(
-            text,
-            reply_to=tweet,
-            media=filename,
-        )
+            scan(video_url, base_dir, filename)
+
+            if self._is_silent():
+                self.log("Silent mode is on. Would've responded to {} with '{} {}'".format(
+                    self._tweet_url(tweet), text, filename))
+                return
+
+            self.post_tweet(
+                text,
+                reply_to=tweet,
+                media=filename,
+            )
+
         self.update_reply_threshold(tweet, prefix)
 
     def _is_silent(self):

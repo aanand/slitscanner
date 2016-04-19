@@ -1,7 +1,6 @@
 import logging
 from math import ceil
 import os
-import tempfile
 
 from PIL import Image
 from PIL import ImageDraw
@@ -11,16 +10,17 @@ log = logging.getLogger(__name__)
 
 
 def scan_frames(filenames,
+                destination,
                 num_bands,
                 band_height):
 
-    frame_dir = tempfile.mkdtemp()
-    log.info("Saving frames to {}".format(frame_dir))
+    if not os.path.exists(destination):
+        os.makedirs(destination)
 
     frames = [Image.open(f).convert("RGB") for f in filenames]
 
     for index, file in enumerate(filenames):
-        new_path = os.path.join(frame_dir, os.path.basename(file))
+        new_path = os.path.join(destination, os.path.basename(file))
         new_frame = make_frame(
             frames=frames,
             index=index,
