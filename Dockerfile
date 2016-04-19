@@ -12,7 +12,6 @@ RUN set -ex; \
       python-dev \
       python-opencv \
       python-pip \
-      python-psycopg2 \
       virtualenv \
     ; \
     rm -rf /var/lib/apt/lists/*
