@@ -1,8 +1,13 @@
+import logging
+
 from .command import check_call
 
 
+log = logging.getLogger(__name__)
+
+
 def smooth_video(filename, destination, rate):
-    check_call([
+    output = check_call([
         'butterflow',
         '-v',   # verbose
         '-sw',  # software rendering
@@ -12,3 +17,4 @@ def smooth_video(filename, destination, rate):
         '-o', destination,
         filename,
     ])
+    log.info(output)
