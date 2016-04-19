@@ -1,17 +1,18 @@
-db:
-  image: postgres:9.3
+version: "2"
 
-bot:
-  build: .
-  links:
-    - db
-  volumes:
-    - .:/code
-  environment:
-    TMPDIR: /code/tmp
-    DATABASE_URL: "postgres://postgres@db:5432/postgres"
-    TWITTER_CONSUMER_KEY:
-    TWITTER_CONSUMER_SECRET:
-    TWITTER_ACCESS_TOKEN:
-    TWITTER_ACCESS_TOKEN_SECRET:
-    SILENT_MODE:
+services:
+  bot:
+    build: .
+    volumes:
+      - .:/code
+      - data:/data
+    environment:
+      TMPDIR: /code/tmp
+      TWITTER_CONSUMER_KEY:
+      TWITTER_CONSUMER_SECRET:
+      TWITTER_ACCESS_TOKEN:
+      TWITTER_ACCESS_TOKEN_SECRET:
+      SILENT_MODE:
+
+volumes:
+  data: {}

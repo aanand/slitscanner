@@ -3,13 +3,13 @@
 
 from __future__ import unicode_literals
 
+from twitterbot import FileStorage
 from twitterbot import TwitterBot
 
 from extensions.giftweet import get_gif_video_url
 from extensions.http import to_filename
 from extensions.slitscan import scan_frames
 from extensions.smooth import smooth_video
-from extensions.sql_storage import SQLStorage
 from extensions.video import extract_frames
 from extensions.video import get_dimensions
 from extensions.video import get_frame_rate
@@ -76,7 +76,7 @@ def scan(url_or_filename):
 
 class SlitScanner(TwitterBot):
     def bot_init(self):
-        self.config['storage'] = SQLStorage(os.environ['DATABASE_URL'])
+        self.config['storage'] = FileStorage('/data')
 
         self.config['api_key'] = os.environ['TWITTER_CONSUMER_KEY']
         self.config['api_secret'] = os.environ['TWITTER_CONSUMER_SECRET']
