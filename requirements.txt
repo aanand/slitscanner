@@ -1,3 +1,4 @@
+-e git://github.com/aanand/twitterbot.git@2a28161361dcb687510ec5b17d2bd0d755d16723#egg=twitterbot
 tweepy==2.3.0
 sqlalchemy==0.9.7
 psycopg2==2.4.5
