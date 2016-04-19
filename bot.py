@@ -185,7 +185,7 @@ class SlitScanner(TwitterBot):
         text = prefix
 
         with tmpdir(delete=not DEBUG) as base_dir:
-            filename = os.path.join(base_dir, 'scanned.gif')
+            filename = os.path.join(base_dir, 'scanned.gif').encode('utf-8')
 
             scan(video_url, base_dir, filename)
 
