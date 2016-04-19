@@ -1,5 +1,4 @@
 import logging
-from math import ceil
 import os
 
 from PIL import Image

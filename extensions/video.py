@@ -1,7 +1,5 @@
 import logging
 import os
-import sys
-import urllib
 import json
 
 from .command import check_call
@@ -16,8 +14,9 @@ def make_gif(all_frames, destination, frame_rate, max_size=None):
     while True:
         frames = all_frames[::step]
         if len(frames) < 2:
-            raise Exception("Can't make a file small enough (%d frames, step = %s)"
-                % (len(all_frames), step))
+            raise Exception(
+                "Can't make a file small enough ({} frames, step = {})"
+                .format(len(all_frames), step))
 
         modified_frame_rate = int(round(frame_rate / step))
 
@@ -87,12 +86,12 @@ def extract_frames(filename, destination, frame_rate):
 def get_frame_rate(filename, default):
     rate = ffprobe_stream(filename, 'r_frame_rate').split('/')
 
-    if len(rate)==1:
+    if len(rate) == 1:
         return float(rate[0])
-    if len(rate)==2:
+    if len(rate) == 2:
         return float(rate[0])/float(rate[1])
 
-    log.error("Unparseable output: {}".format(out))
+    log.error("Unparseable output: {}".format(rate))
     return default
 
 

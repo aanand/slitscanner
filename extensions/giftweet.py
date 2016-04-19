@@ -23,10 +23,14 @@ def get_gif_video_url(api, tweet):
 
     tag = soup.find('div', attrs={"data-tweet-id": tweet_id})
     if not tag:
-        log.info("Couldn't find a div with data-tweet-id={} - giving up".format(repr(tweet_id)))
+        log.info(
+            "Couldn't find a div with data-tweet-id={} - giving up"
+            .format(repr(tweet_id)))
         return None
 
-    match = re.search(r'https?://pbs\.twimg\.com/tweet_video_thumb/(.+)\.\w+', unicode(tag))
+    match = re.search(
+        r'https?://pbs\.twimg\.com/tweet_video_thumb/(.+)\.\w+', unicode(tag))
+
     if not match:
         log.info("Couldn't find a thumbnail URL - giving up")
         return None
@@ -50,7 +54,9 @@ def get_gif_page_url_climbing(api, tweet):
 
         # don't reply to myself
         if tweet.author.id == me.id:
-            log.info("Found my own tweet ({}) - stopping".format(tweet_url(tweet)))
+            log.info(
+                "Found my own tweet ({}) - stopping"
+                .format(tweet_url(tweet)))
             break
 
         log.info("Climbing up to status {}".format(tweet_url(tweet)))
@@ -70,4 +76,5 @@ def get_gif_page_url(tweet):
 
 
 def tweet_url(tweet):
-    return "http://twitter.com/{}/status/{}".format(tweet.author.screen_name, tweet.id)
+    return "http://twitter.com/{}/status/{}".format(
+        tweet.author.screen_name, tweet.id)

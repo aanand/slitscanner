@@ -1,5 +1,6 @@
 *.env
 *.pkl
 *.log
+/.tox
 /tmp
 /samples

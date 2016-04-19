@@ -106,7 +106,8 @@ class SlitScanner(TwitterBot):
         self.config['access_secret'] = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
 
         # use this to define a (min, max) random range of how often to tweet
-        # e.g., self.config['tweet_interval_range'] = (5*60, 10*60) # tweets every 5-10 minutes
+        # e.g. to tweet every 5-10 minutes:
+        # self.config['tweet_interval_range'] = (5*60, 10*60)
         self.config['tweet_interval_range'] = (1*60, 3*60*60)
 
         # only reply to tweets that specifically mention the bot
@@ -137,9 +138,11 @@ class SlitScanner(TwitterBot):
         self.config['recent_replies_window'] = 20*60
 
         # probability of replying to a matching timeline tweet
-        self.config['timeline_reply_probability'] = float(os.environ.get('TIMELINE_REPLY_PROBABILITY') or '0.05')
+        self.config['timeline_reply_probability'] = \
+            float(os.environ.get('TIMELINE_REPLY_PROBABILITY') or '0.05')
 
-        self.config['silent_mode'] = (int(os.environ.get('SILENT_MODE') or '1') != 0)
+        self.config['silent_mode'] = \
+            (int(os.environ.get('SILENT_MODE') or '1') != 0)
 
     def on_scheduled_tweet(self):
         pass
@@ -159,7 +162,9 @@ class SlitScanner(TwitterBot):
             return
 
         if random.random() > self.config['timeline_reply_probability']:
-            self.log("Failed dice roll. Not responding to {}".format(self._tweet_url(tweet)))
+            self.log(
+                "Failed dice roll. Not responding to {}"
+                .format(self._tweet_url(tweet)))
             return
 
         try:
@@ -171,7 +176,9 @@ class SlitScanner(TwitterBot):
     def reply_to_tweet(self, tweet, prefix):
         video_url = get_gif_video_url(self.api, tweet)
         if video_url is None:
-            self.log("Couldn't find a gif video URL for {}".format(self._tweet_url(tweet)))
+            self.log(
+                "Couldn't find a gif video URL for {}"
+                .format(self._tweet_url(tweet)))
             return
 
         text = prefix
@@ -182,8 +189,9 @@ class SlitScanner(TwitterBot):
             scan(video_url, base_dir, filename)
 
             if self._is_silent():
-                self.log("Silent mode is on. Would've responded to {} with '{} {}'".format(
-                    self._tweet_url(tweet), text, filename))
+                self.log(
+                    "Silent mode is on. Would've responded to {} with '{} {}'"
+                    .format(self._tweet_url(tweet), text, filename))
                 return
 
             self.post_tweet(
@@ -200,16 +208,24 @@ class SlitScanner(TwitterBot):
     def check_reply_threshold(self, tweet, prefix):
         self.trim_recent_replies()
         screen_names = self.get_screen_names(prefix)
-        over_threshold = [sn for sn in screen_names if self.over_reply_threshold(sn)]
+        over_threshold = [
+            sn for sn in screen_names
+            if self.over_reply_threshold(sn)
+        ]
 
         if len(over_threshold) > 0:
-            self.log("Over reply threshold for {}. Not responding to {}".format(", ".join(over_threshold), self._tweet_url(tweet)))
+            self.log(
+                "Over reply threshold for {}. Not responding to {}"
+                .format(", ".join(over_threshold), self._tweet_url(tweet)))
             return False
 
         return True
 
     def over_reply_threshold(self, screen_name):
-        replies = [r for r in self.recent_replies() if screen_name in r['screen_names']]
+        replies = [
+            r for r in self.recent_replies()
+            if screen_name in r['screen_names']
+        ]
         return len(replies) >= self.config['reply_threshold']
 
     def update_reply_threshold(self, tweet, prefix):
@@ -220,7 +236,9 @@ class SlitScanner(TwitterBot):
             'screen_names': screen_names,
         })
 
-        self.log("Updated recent_replies: len = {}".format(len(self.recent_replies())))
+        self.log(
+            "Updated recent_replies: len = {}"
+            .format(len(self.recent_replies())))
 
     def get_screen_names(self, prefix):
         return [sn.replace('@', '') for sn in prefix.split()]
@@ -230,9 +248,12 @@ class SlitScanner(TwitterBot):
         now = arrow.utcnow()
         self.state['recent_replies'] = [
             r for r in self.recent_replies()
-            if (now - r['created_at']).seconds < self.config['recent_replies_window']
+            if ((now - r['created_at']).seconds <
+                self.config['recent_replies_window'])
         ]
-        self.log("Trimmed recent_replies: {} -> {}".format(len_before, len(self.recent_replies())))
+        self.log(
+            "Trimmed recent_replies: {} -> {}"
+            .format(len_before, len(self.recent_replies())))
 
     def recent_replies(self):
         if 'recent_replies' not in self.state:
