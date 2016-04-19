@@ -16,8 +16,7 @@ RUN set -ex; \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/dthpham/butterflow.git /butterflow
-RUN pip install /butterflow
+RUN pip install git+git://github.com/dthpham/butterflow.git@48d3fca11c21f6680839ea9789eb928791a22b3e
 
 RUN mkdir /code
 WORKDIR /code
