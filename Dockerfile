@@ -16,7 +16,7 @@ RUN set -ex; \
     ; \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install git+git://github.com/dthpham/butterflow.git@48d3fca11c21f6680839ea9789eb928791a22b3e
+RUN pip install git+git://github.com/aanand/butterflow.git@e51d8ea5675ac80b335bc1c9caef7997364b759b
 
 RUN mkdir /code
 WORKDIR /code
