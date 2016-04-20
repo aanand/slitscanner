@@ -3,6 +3,7 @@ import os
 import json
 
 from .command import check_call
+from .command import CalledProcessError
 
 
 log = logging.getLogger(__name__)
@@ -28,7 +29,14 @@ def make_gif(all_frames, destination, frame_rate, max_size=None):
         ]
         cmd += frames
         cmd.append(destination)
-        check_call(cmd)
+
+        try:
+            check_call(cmd)
+        except CalledProcessError:
+            # it's possible `convert` ran out of memory and was killed, so try
+            # again with fewer frames
+            step += 1
+            continue
 
         if max_size and os.stat(destination).st_size > max_size:
             step += 1

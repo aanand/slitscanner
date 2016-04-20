@@ -1,4 +1,5 @@
-import subprocess
+from subprocess import check_output
+from subprocess import CalledProcessError
 import logging
 
 
@@ -10,8 +11,8 @@ def check_call(cmd, *args, **kwargs):
     output = ""
 
     try:
-        output = subprocess.check_output(cmd, *args, **kwargs)
+        output = check_output(cmd, *args, **kwargs)
         return output
-    except subprocess.CalledProcessError:
+    except CalledProcessError:
         log.error(output)
         raise
