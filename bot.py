@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from twitterbot import FileStorage
 from twitterbot import TwitterBot
 
-from extensions.giftweet import get_gif_video_url
+from extensions.giftweet import get_gif_video_url_climbing
 from extensions.http import to_filename
 from extensions.slitscan import scan_frames
 from extensions.smooth import smooth_video
@@ -175,7 +175,7 @@ class SlitScanner(TwitterBot):
             return
 
     def reply_to_tweet(self, tweet, prefix):
-        video_url = get_gif_video_url(self.api, tweet)
+        video_url = get_gif_video_url_climbing(self.api, tweet)
         if video_url is None:
             self.log(
                 "Couldn't find a gif video URL for {}"

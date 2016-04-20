@@ -11,7 +11,7 @@ def get_gif_video_url_climbing(api, tweet):
     me = api.me()
 
     while True:
-        url = get_gif_video_url(tweet)
+        url = get_gif_video_url(api, tweet)
 
         if url:
             return url
