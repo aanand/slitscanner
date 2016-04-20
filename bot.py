@@ -33,10 +33,11 @@ DEBUG = int(os.environ.get('DEBUG') or '0') != 0
 
 
 # The minimum number of bands to split the image into.
-# If the number of frames is less than this, we first
-# increase the framerate with smoothing.
 MIN_BANDS = 100
 
+# If the number of frames is less than this, we first
+# increase the framerate with smoothing.
+SMOOTHING_THRESHOLD = 75
 
 def scan(url_or_filename, base_dir, destination):
     filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
@@ -81,7 +82,7 @@ def smooth(filename, base_dir):
     num_frames = get_num_frames(filename)
     log.info("Num frames: {}".format(num_frames))
 
-    if num_frames >= MIN_BANDS:
+    if num_frames >= SMOOTHING_THRESHOLD:
         return filename, num_frames
 
     smoothed_filename = os.path.join(base_dir, 'source-2x.mp4')
