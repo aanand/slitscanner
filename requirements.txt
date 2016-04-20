@@ -2,5 +2,4 @@ git+git://github.com/aanand/twitterbot.git@2a28161361dcb687510ec5b17d2bd0d755d16
 tweepy==2.3.0
 arrow==0.4.2
 ipython==2.3.1
-beautifulsoup4==4.3.2
 Pillow==3.2.0
