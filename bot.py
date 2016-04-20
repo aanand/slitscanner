@@ -149,11 +149,7 @@ class SlitScanner(TwitterBot):
         if not self.check_reply_threshold(tweet, prefix):
             return
 
-        try:
-            self.reply_to_tweet(tweet, prefix)
-        except Exception:
-            traceback.print_exc()
-            return
+        self.safe_reply(tweet, prefix)
 
     def on_timeline(self, tweet, prefix):
         if not self.check_reply_threshold(tweet, prefix):
@@ -165,9 +161,16 @@ class SlitScanner(TwitterBot):
                 .format(self._tweet_url(tweet)))
             return
 
+        self.safe_reply(tweet, prefix)
+
+    def safe_reply(self, tweet, prefix):
         try:
             self.reply_to_tweet(tweet, prefix)
-        except Exception:
+        except OSError as e:
+            # let OS errors bubble up and crash the bot - in case we're out of
+            # memory, let's restart and see if that helps
+            raise e
+        except StandardError:
             traceback.print_exc()
             return
 
