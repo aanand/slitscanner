@@ -170,7 +170,7 @@ class SlitScanner(TwitterBot):
             # let OS errors bubble up and crash the bot - in case we're out of
             # memory, let's restart and see if that helps
             raise e
-        except StandardError:
+        except Exception:
             traceback.print_exc()
             return
 
