@@ -1,6 +1,8 @@
 import logging
 import re
 
+from tweepy.error import TweepError
+
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +21,11 @@ def get_gif_video_url_climbing(api, tweet):
         if tweet.in_reply_to_status_id is None:
             break
 
-        tweet = api.get_status(tweet.in_reply_to_status_id)
+        try:
+            tweet = api.get_status(tweet.in_reply_to_status_id)
+        except TweepError:
+            log.info("Next tweet up the chain has been deleted - stopping")
+            break
 
         # don't reply to myself
         if tweet.author.id == me.id:
