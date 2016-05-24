@@ -1,6 +1,6 @@
 import logging
 
-from .command import check_call
+from botutils.command import check_call
 
 
 log = logging.getLogger(__name__)

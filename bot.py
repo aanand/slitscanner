@@ -6,17 +6,18 @@ from __future__ import unicode_literals
 from twitterbot import FileStorage
 from twitterbot import TwitterBot
 
-from extensions.giftweet import get_gif_video_url_climbing
-from extensions.http import to_filename
+from botutils.gif import make_gif
+from botutils.giftweet import get_gif_video_url_climbing
+from botutils.http import to_filename
+from botutils.tmpdir import tmpdir
+from botutils.video import extract_frames
+from botutils.video import get_dimensions
+from botutils.video import get_frame_rate
+from botutils.video import get_num_frames
+from botutils.video import to_video
+
 from extensions.slitscan import scan_frames
 from extensions.smooth import smooth_video
-from extensions.tmpdir import tmpdir
-from extensions.video import extract_frames
-from extensions.video import get_dimensions
-from extensions.video import get_frame_rate
-from extensions.video import get_num_frames
-from extensions.video import make_gif
-from extensions.video import to_video
 
 import arrow
 
@@ -38,6 +39,7 @@ MIN_BANDS = 100
 # If the number of frames is less than this, we first
 # increase the framerate with smoothing.
 SMOOTHING_THRESHOLD = 75
+
 
 def scan(url_or_filename, base_dir, destination):
     filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
