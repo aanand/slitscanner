@@ -26,6 +26,11 @@ MIN_BANDS = 100
 SMOOTHING_THRESHOLD = 75
 
 
+# Maximum size, in bytes, of animated GIFs allowed by
+# the Twitter API
+MAX_GIF_SIZE = 5*1024*1024
+
+
 def scan(url_or_filename, base_dir, destination):
     filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
     filename = to_video(filename, os.path.join(base_dir, 'source.mp4'))
@@ -61,7 +66,7 @@ def scan(url_or_filename, base_dir, destination):
         frames,
         destination,
         frame_rate=frame_rate,
-        max_size=3*1024*1024,
+        max_size=MAX_GIF_SIZE,
     )
 
 
