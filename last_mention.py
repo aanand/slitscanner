@@ -19,4 +19,6 @@ if len(sys.argv) >= 2:
     bot.state['last_mention_id'] = new_value
     log.info("Clearing mention queue")
     bot.state['mention_queue'] = []
+    log.info("Clearing recent replies")
+    bot.state['recent_replies'] = []
     bot._save_state()
