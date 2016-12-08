@@ -28,7 +28,11 @@ DEBUG = int(os.environ.get('DEBUG') or '0') != 0
 
 class SlitScanner(TwitterBot):
     def bot_init(self):
-        self.config['storage'] = FileStorage('/data')
+        data_dir = os.environ.get('DATA_DIR', './data')
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+
+        self.config['storage'] = FileStorage(data_dir)
 
         self.config['api_key'] = os.environ['TWITTER_CONSUMER_KEY']
         self.config['api_secret'] = os.environ['TWITTER_CONSUMER_SECRET']
