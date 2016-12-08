@@ -102,12 +102,14 @@ class SlitScanner(TwitterBot):
     def safe_reply(self, tweet, prefix):
         try:
             self.reply_to_tweet(tweet, prefix)
-        except OSError as e:
+        except Exception as e:
+            traceback.print_exc()
+
             # let OS errors bubble up and crash the bot - in case we're out of
             # memory, let's restart and see if that helps
-            raise e
-        except Exception:
-            traceback.print_exc()
+            if isinstance(e, OSError):
+                raise e
+
             return
 
     def reply_to_tweet(self, tweet, prefix):
