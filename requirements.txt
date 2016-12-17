@@ -1,5 +1,5 @@
 git+git://github.com/aanand/botutils.git@fc828a6f69677e4f0b059877df716c61147057fe
-git+git://github.com/aanand/twitterbot.git@6988e7aa51abc88ba05786bdca20079400034bf9
+git+git://github.com/aanand/twitterbot.git@64b527260e3cea676d47df84df972940a19ba806
 git+git://github.com/tweepy/tweepy.git@355b496d1ab08d55b0ce5be941927775d61e1f07#egg=tweepy
 arrow==0.4.2
 ipython==2.3.1
