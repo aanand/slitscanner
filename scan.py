@@ -21,9 +21,15 @@ log = logging.getLogger(__name__)
 # The minimum number of bands to split the image into.
 MIN_BANDS = 100
 
-# If the number of frames is less than this, we first
-# increase the framerate with smoothing.
-SMOOTHING_THRESHOLD = 75
+
+# If for any reason we can't determine a file's frame rate,
+# assume it's this.
+DEFAULT_FRAME_RATE = 24.0
+
+
+# If the frame rate is lower than this, we first
+# double it with smoothing.
+SMOOTHING_THRESHOLD = 20.0
 
 
 # Maximum size, in bytes, of animated GIFs allowed by
@@ -35,7 +41,11 @@ def scan(url_or_filename, base_dir, destination):
     filename = to_filename(url_or_filename, os.path.join(base_dir, 'source'))
     filename = to_video(filename, os.path.join(base_dir, 'source.mp4'))
 
-    filename, num_frames = smooth(filename, base_dir)
+    filename, frame_rate = smooth(filename, base_dir)
+    log.info("Frame rate: {}".format(frame_rate))
+
+    num_frames = get_num_frames(filename)
+    log.info("Num frames: {}".format(num_frames))
 
     (frame_width, frame_height) = get_dimensions(filename)
     log.info("Dimensions: {}x{}".format(frame_width, frame_height))
@@ -45,9 +55,6 @@ def scan(url_or_filename, base_dir, destination):
 
     band_height = float(frame_height) / num_bands
     log.info("Band height: {}".format(band_height))
-
-    frame_rate = get_frame_rate(filename, 24.0)
-    log.info("Frame rate: {}fps".format(frame_rate))
 
     frames = extract_frames(
         filename,
@@ -71,19 +78,17 @@ def scan(url_or_filename, base_dir, destination):
 
 
 def smooth(filename, base_dir):
-    num_frames = get_num_frames(filename)
-    log.info("Num frames: {}".format(num_frames))
+    frame_rate = get_frame_rate(filename, DEFAULT_FRAME_RATE)
 
-    if num_frames >= SMOOTHING_THRESHOLD:
-        return filename, num_frames
+    if frame_rate >= SMOOTHING_THRESHOLD:
+        return filename, frame_rate
+
+    log.info("Frame rate is too low ({}) - smoothing".format(frame_rate))
 
     smoothed_filename = os.path.join(base_dir, 'source-2x.mp4')
     smooth_video(filename, smoothed_filename, '2x')
 
-    num_frames = get_num_frames(filename)
-    log.info("Num frames after smoothing: {}".format(num_frames))
-
-    return smoothed_filename, num_frames
+    return smoothed_filename, get_frame_rate(filename, DEFAULT_FRAME_RATE)
 
 
 if __name__ == '__main__':
